@@ -15,7 +15,7 @@ public class CommunityUtil {
     //MD5加密，对密码进行加密
     //特点：只能加密不能解密，(每次加密的结果都是一个值)
     public static String md5(String key) {
-        if (StringUtils.isNotBlank(key)) {
+        if (StringUtils.isBlank(key)) {
             return null;
         }
         return DigestUtils.md5DigestAsHex(key.getBytes());
