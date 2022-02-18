@@ -88,6 +88,13 @@
             <version>2.3.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <!--	发布帖子-Json需要的包		-->
+            <artifactId>fastjson</artifactId>
+            <version>1.2.76</version>
+        </dependency>
+
     </dependencies>
 
     <build>
