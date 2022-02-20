@@ -2,9 +2,13 @@ package com.project.nowcodercommunity.controller;
 
 import com.project.nowcodercommunity.annotation.LoginRequired;
 import com.project.nowcodercommunity.entity.User;
+import com.project.nowcodercommunity.service.FollowService;
+import com.project.nowcodercommunity.service.LikeService;
 import com.project.nowcodercommunity.service.UserService;
+import com.project.nowcodercommunity.util.CommunityConstant;
 import com.project.nowcodercommunity.util.CommunityUtil;
 import com.project.nowcodercommunity.util.HostHolder;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Mapper;
 import org.slf4j.Logger;
@@ -16,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -27,7 +32,7 @@ import java.io.OutputStream;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements CommunityConstant {
 
     //日志
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -49,6 +54,12 @@ public class UserController {
 
     @Autowired
     private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
     @LoginRequired//自定义注解，结合拦截器，作用是必须登录才能访问
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
@@ -119,4 +130,35 @@ public class UserController {
             logger.error("读取头像失败：" + e.getMessage());
         }
     }
+
+    //个人主页
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在！");
+        }
+        //用户的基本信息发给页面
+        model.addAttribute("user", user);
+        //用户获得赞的数量
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
+
+        //查询关注数量
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+        //查询粉丝数量
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
+        //是否已关注
+        boolean hasFollowed = false;
+        if (hostHolder.getUser() != null) {
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
+        }
+        model.addAttribute("hasFollowed", hasFollowed);
+
+        return "/site/profile";
+    }
+
+
 }
