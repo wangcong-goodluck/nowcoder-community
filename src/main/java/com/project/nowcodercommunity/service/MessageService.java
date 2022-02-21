@@ -3,6 +3,7 @@ package com.project.nowcodercommunity.service;
 import com.project.nowcodercommunity.dao.MessageMapper;
 import com.project.nowcodercommunity.entity.Message;
 import com.project.nowcodercommunity.util.SensitiveFilter;
+import com.sun.xml.internal.ws.api.model.MEP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
@@ -48,5 +49,25 @@ public class MessageService {
     //将消息变成已读
     public int readMessage(List<Integer> ids) {
         return messageMapper.updateStatus(ids, 1);
+    }
+
+    //1.查询某个主题下最新的通知
+    public Message findLatestNotice(int userId, String topic) {
+        return messageMapper.selectLatestNotice(userId, topic);
+    }
+
+    //2.查询某个主题所包含的通知的数量
+    public int findNoticeCount(int userId, String topic) {
+        return messageMapper.selectNoticeCount(userId, topic);
+    }
+
+    //3.查询未读的通知的数量
+    public int findNoticeUnreadCount(int userId, String topic) {
+        return messageMapper.selectNoticeUnreadCount(userId, topic);
+    }
+
+    //查询某主题包含的主题列表
+    public List<Message> findNotices(int userId, String topic, int offset, int limit) {
+        return messageMapper.selectNotices(userId, topic, offset, limit);
     }
 }
